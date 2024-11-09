@@ -2,14 +2,9 @@ import { useState } from "react";
 
 const App = () => {
   const [data, setData] = useState([]);
-  const [add, setAdd] = useState(false);
   const [newTask, setNewTask] = useState("");
 
-  const addHandler = () => {
-    setAdd(!add);
-  };
-
-  const inputHandler = (e) => {
+  const addTask = (e) => {
     setNewTask(e.target.value);
   };
 
@@ -34,68 +29,61 @@ const App = () => {
       .then((todoData) => {
         setData((prevTodos) => [...prevTodos, { ...todoData, id: Date.now() }]);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error(error));
   };
 
-  console.log(data);
+  const deleteHandler = (id) => {
+    fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    })
+      .then(() => {
+        setData((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      })
+      .catch((error) => console.error(error));
+  };
+
+  // console.log(data);
 
   return (
-    <section className="px-10 py-6 space-y-4">
-      <h1 className="text-2xl font-semibold">TODOs:</h1>
+    <section className="px-10 py-8 space-y-6 h-screen bg-[#181717] fontStyle">
+      <div className="flex">
+        <h1 className="font-semibold text-transparent text-3xl md:text-4xl bg-clip-text bg-gradient-to-r from-pink-500 to-blue-600">
+          Todo App
+        </h1>
+      </div>
 
-      <button
-        onClick={addHandler}
-        className="py-1 px-4 border border-black rounded-md"
-      >
-        Add
-      </button>
+      <div>
+        <form className="relative w-full max-w-md">
+          <input
+            value={newTask}
+            onInput={addTask}
+            type="search"
+            className="rounded-md py-3 pl-4 pr-20 bg-[#2e2e2e] block w-full appearance-none"
+            placeholder="Task name"
+          ></input>
+          <button
+            type="submit"
+            onClick={fetchTodoData}
+            className="absolute right-0 top-0 mt-1.5 mr-1.5 py-1.5 px-4 rounded-md font-semibold text-[#fafafa] bg-[#151515]"
+          >
+            Add
+          </button>
+        </form>
+      </div>
 
-      {add && (
-        <div>
-          <form>
-            <label>Add Task: </label>
-            <input
-              value={newTask}
-              onInput={inputHandler}
-              type="text"
-              className="border border-black rounded-sm px-2 py-0.5"
-              placeholder="Task..."
-            ></input>
-            <button
-              type="submit"
-              onClick={fetchTodoData}
-              className="py-1 px-4 border border-black rounded-md"
-            >
-              Create
-            </button>
-          </form>
-        </div>
-      )}
-      {/* <ol className="list-decimal list-inside space-y-3">
-        {data.map((todo) => (
-          <li key={todo.id}>
-            {todo.title}{" "}
-            <span
-              className={`${
-                todo.completed ? "text-green-600" : "text-red-600"
-              } font-semibold`}
-            >
-              {todo.completed ? "Done" : "Pending"}
-            </span>
-          </li>
-        ))}
-      </ol> */}
       {data.length >= 1 &&
         data.map((todo) => (
-          <li key={todo.id}>
+          <li key={todo.id} className="text-gray-300">
             {todo.title}{" "}
-            <span
-              className={`${
-                todo.completed ? "text-green-600" : "text-red-600"
-              } font-semibold`}
+            <button
+              className="text-red-500 font-semibold"
+              onClick={() => deleteHandler(todo.id)}
             >
-              {todo.completed ? "Done" : "Pending"}
-            </span>
+              <i className="far fa-trash-can"></i>
+            </button>
           </li>
         ))}
     </section>
